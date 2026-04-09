@@ -20,23 +20,23 @@ func Run(addr string) error {
 	defer l.Close()
 
 	fmt.Println("Redis-clone listen to", addr)
-	Serve(l)
+	Serve(l, NewKVStore())
 	return nil
 }
 
-// Serve accepts connections on l until l is closed.
-func Serve(l net.Listener) {
+// Serve accepts connections on l until l is closed. kv is shared across clients.
+func Serve(l net.Listener, kv *KVStore) {
 	for {
 		conn, err := l.Accept()
 		if err != nil {
 			fmt.Println("Error accepting connection:", err)
 			continue
 		}
-		go handleConnection(conn)
+		go handleConnection(conn, kv)
 	}
 }
 
-func handleConnection(conn net.Conn) {
+func handleConnection(conn net.Conn, kv *KVStore) {
 	defer conn.Close()
 
 	br := bufio.NewReader(conn)
@@ -49,14 +49,14 @@ func handleConnection(conn net.Conn) {
 			_ = resp.WriteValue(conn, resp.Err("ERR Protocol error: "+err.Error()))
 			return
 		}
-		out := dispatchRequest(req)
+		out := dispatchRequest(req, kv)
 		if err := resp.WriteValue(conn, out); err != nil {
 			return
 		}
 	}
 }
 
-func dispatchRequest(v resp.Value) resp.Value {
+func dispatchRequest(v resp.Value, kv *KVStore) resp.Value {
 	if v.Kind != resp.KindArray || v.ArrayNull {
 		return resp.Err("ERR Protocol error: expected array")
 	}
@@ -91,6 +91,33 @@ func dispatchRequest(v resp.Value) resp.Value {
 			return resp.Err("ERR value is not a valid bulk string")
 		}
 		return resp.Bulk(arg.Str, false)
+	case "SET":
+		if len(v.Elems) != 3 {
+			return resp.Err("ERR wrong number of arguments for 'set' command")
+		}
+		keyArg := v.Elems[1]
+		valArg := v.Elems[2]
+		if keyArg.Kind != resp.KindBulkString || keyArg.BulkNull {
+			return resp.Err("ERR value is not a valid bulk string")
+		}
+		if valArg.Kind != resp.KindBulkString || valArg.BulkNull {
+			return resp.Err("ERR value is not a valid bulk string")
+		}
+		kv.Set(keyArg.Str, valArg.Str)
+		return resp.Simple("OK")
+	case "GET":
+		if len(v.Elems) != 2 {
+			return resp.Err("ERR wrong number of arguments for 'get' command")
+		}
+		keyArg := v.Elems[1]
+		if keyArg.Kind != resp.KindBulkString || keyArg.BulkNull {
+			return resp.Err("ERR value is not a valid bulk string")
+		}
+		val, ok := kv.Get(keyArg.Str)
+		if !ok {
+			return resp.Bulk("", true)
+		}
+		return resp.Bulk(val, false)
 	default:
 		return resp.Err("ERR unknown command '" + cmd.Str + "'")
 	}

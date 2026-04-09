@@ -51,13 +51,21 @@ redis-cli ECHO "Hello World"
 # Returns "Hello World"
 ```
 
-### [ ] Step 3: GET & SET (The Core)
+### [x] Step 3: GET & SET (The Core)
 
 Implement the "Remote Dictionary" functionality.
 
-  - [ ] `SET <key> <value>`: Store a value.
-  - [ ] `GET <key>`: Retrieve a value.
+  - [x] `SET <key> <value>`: Store a value.
+  - [x] `GET <key>`: Retrieve a value.
   - Choose an efficient internal data structure (like a Hash Map).
+
+<!-- end list -->
+
+```bash
+redis-cli SET mykey "Hello"
+redis-cli GET mykey
+# Returns "Hello"
+```
 
 ### [ ] Step 4: Concurrency
 

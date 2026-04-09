@@ -28,10 +28,17 @@ Running log for the Redis clone challenge: what works, what proves it, and open 
 - **Proves it:** `go test ./internal/server/...` — raw RESP over loopback `:0` for `PING`, `ECHO "Hello World"`, and unknown command. `go test ./internal/resp/...` includes `ReadValueFrom` sequential decode.
 - **Port 6379:** if a system Redis already binds `:6379`, run with another address (e.g. change `main` or `go run .` with a fork that passes a different `addr`) or stop the other process; tests use `:0` to avoid collisions.
 
+### Step 3 — GET, SET
+
+- [x] In-memory string store: [`KVStore`](internal/server/store.go) — `map[string]string` with `sync.RWMutex` for safe concurrent access from multiple client goroutines.
+- [x] `SET key value` (three bulk arguments) → `+OK\r\n`. `GET key` (two bulk arguments) → bulk string value, or `$-1\r\n` if the key is missing (Redis-compatible null bulk).
+- [x] Wrong arity → `-ERR wrong number of arguments for 'set'|'get' command\r\n`; non-bulk key/value where required → same bulk-string error pattern as `ECHO`.
+- **Proves it:** `go test ./internal/server/...` — `TestSetReturnsOK`, `TestSetThenGetReturnsValue`, `TestGetMissingKeyReturnsNullBulk`, `TestSetWrongArityReturnsError`, `TestGetWrongArityReturnsError`, plus existing PING/ECHO tests. **Manual:** `redis-cli -p 6379 SET foo bar` then `GET foo` (stop system Redis first or use another port if `:6379` is taken).
+
 ### Later steps
 
-- Add dated bullets as you complete GET/SET, concurrency, expiry, persistence, benchmarks.
+- Concurrency benchmarks (`redis-benchmark`), expiry, persistence, benchmarks vs official Redis.
 
 ## Design notes (ADR-light)
 
-- (e.g. **Concurrency:** goroutine per client vs event loop — decision + date.)
+- **KV store (2026-04):** `map[string]string` + `sync.RWMutex` — O(1) average get/set; multiple readers can proceed in parallel. Alternatives later: `sync.Map` or sharding if profiling warrants it.
