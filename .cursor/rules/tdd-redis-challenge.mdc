@@ -1,0 +1,12 @@
+---
+description: TDD and documentation rhythm for this Redis clone repo
+alwaysApply: true
+---
+
+# TDD and progress
+
+- Follow red–green–refactor. Do not add behavior without a failing test first, unless you add a one-line note in `PROGRESS.md` explaining why (e.g. spike to be replaced by tests).
+- Keep tests next to code: `*_test.go` beside implementation.
+- Prefer deterministic unit tests for RESP parsing/encoding; use `net.Pipe` or a loopback listener with port `:0` for integration-style server tests.
+- When a readme milestone is done or `redis-cli`-visible behavior changes, update `PROGRESS.md` (what works, which tests prove it, known limits).
+- Default listen address `:6379` may conflict with a local Redis; call that out in `PROGRESS.md` when relevant.

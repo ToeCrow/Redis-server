@@ -1,0 +1,12 @@
+---
+description: Go style and testing conventions for this project
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# Go standards
+
+- Run `gofmt` on changed Go files; keep `go vet ./...` clean.
+- Use table-driven tests where it reduces duplication.
+- Avoid unnecessary global mutable state in library code under `internal/`.
+- Keep `main` thin: wire flags and call `internal/server` (and later `internal/resp`); avoid large logic in `main.go`.

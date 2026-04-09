@@ -1,0 +1,12 @@
+---
+description: RESP encoding/decoding conventions and references
+globs: internal/resp/**/*.go
+alwaysApply: false
+---
+
+# RESP (Redis Serialization Protocol)
+
+- Canonical spec: https://redis.io/docs/latest/develop/reference/protocol-spec/
+- Support simple strings (`+`), errors (`-`), integers (`:`), bulk strings (`$`), and arrays (`*`).
+- Lines end with CRLF (`\r\n`). Null bulk string is `$-1\r\n`.
+- Add tests for examples such as `*1\r\n$4\r\nping\r\n`, `+OK\r\n`, and `$-1\r\n`.
