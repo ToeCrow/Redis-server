@@ -23,7 +23,10 @@ Running log for the Redis clone challenge: what works, what proves it, and open 
 
 ### Step 2 — Server, PING, ECHO
 
-- [ ] Listener and commands documented; manual `redis-cli` checks noted here if useful.
+- [x] TCP server: [`internal/server`](internal/server) — `Run` listens on the given address (default [`main.go`](main.go) uses `:6379`); `Serve` accepts one goroutine per client; requests are RESP2 arrays parsed with [`resp.ReadValueFrom`](internal/resp/decode.go) on a **single** `bufio.Reader` per connection so pipelined commands do not lose buffered bytes.
+- [x] `PING` (no args) → `+PONG\r\n`; `PING` with one bulk argument echoes that string as a bulk reply (Redis-compatible). `ECHO` → bulk string reply; unknown commands → `-ERR unknown command ...\r\n`.
+- **Proves it:** `go test ./internal/server/...` — raw RESP over loopback `:0` for `PING`, `ECHO "Hello World"`, and unknown command. `go test ./internal/resp/...` includes `ReadValueFrom` sequential decode.
+- **Port 6379:** if a system Redis already binds `:6379`, run with another address (e.g. change `main` or `go run .` with a fork that passes a different `addr`) or stop the other process; tests use `:0` to avoid collisions.
 
 ### Later steps
 

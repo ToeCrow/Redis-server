@@ -9,7 +9,13 @@ import (
 
 // ReadValue reads one RESP2 value from r.
 func ReadValue(r io.Reader) (Value, error) {
-	br := bufio.NewReader(r)
+	return ReadValueFrom(bufio.NewReader(r))
+}
+
+// ReadValueFrom reads one RESP2 value from br. Reuse the same bufio.Reader on a
+// streaming connection (for example TCP) so bytes buffered for the next value
+// are not discarded between calls.
+func ReadValueFrom(br *bufio.Reader) (Value, error) {
 	return readValue(br)
 }
 

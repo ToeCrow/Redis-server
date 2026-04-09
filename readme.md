@@ -37,12 +37,12 @@ Implement the **Redis Serialisation Protocol (RESP)**. Refer to the [RESP protoc
       - `+OK\r\n`
       - `$-1\r\n` (Null value)
 
-### [ ] Step 2: Basic Server & PING/ECHO
+### [x] Step 2: Basic Server & PING/ECHO
 
 Create the server listening on port **6379**.
 
-  - [ ] Implement `PING`: Respond with `PONG`.
-  - [ ] Implement `ECHO`: Return the provided string.
+  - [x] Implement `PING`: Respond with `PONG`.
+  - [x] Implement `ECHO`: Return the provided string.
 
 <!-- end list -->
 

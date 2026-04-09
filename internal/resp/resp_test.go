@@ -1,6 +1,7 @@
 package resp
 
 import (
+	"bufio"
 	"bytes"
 	"strings"
 	"testing"
@@ -101,6 +102,27 @@ func TestEmptyBulkString(t *testing.T) {
 	want := Bulk("", false)
 	if !equalValue(v, want) {
 		t.Fatalf("got %+v want %+v", v, want)
+	}
+}
+
+func TestReadValueFromSequential(t *testing.T) {
+	t.Parallel()
+	// Two back-to-back RESP values; a single bufio.Reader must preserve both.
+	raw := "+OK\r\n$5\r\nhello\r\n"
+	br := bufio.NewReader(strings.NewReader(raw))
+	v1, err := ReadValueFrom(br)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !equalValue(v1, Simple("OK")) {
+		t.Fatalf("first: got %+v", v1)
+	}
+	v2, err := ReadValueFrom(br)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !equalValue(v2, Bulk("hello", false)) {
+		t.Fatalf("second: got %+v", v2)
 	}
 }
 
