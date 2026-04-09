@@ -27,7 +27,7 @@ Set up the development environment for network programming and **Test-Driven Dev
 
   - Ongoing log: see [PROGRESS.md](PROGRESS.md).
 
-### [ ] Step 1: RESP Protocol Implementation
+### [x] Step 1: RESP Protocol Implementation
 
 Implement the **Redis Serialisation Protocol (RESP)**. Refer to the [RESP protocol specification](https://redis.io/docs/latest/develop/reference/protocol-spec/).
 

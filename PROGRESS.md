@@ -17,7 +17,9 @@ Running log for the Redis clone challenge: what works, what proves it, and open 
 
 ### Step 1 — RESP
 
-- [ ] Encode/decode implemented under `internal/resp` with tests.
+- [x] Encode/decode implemented under `internal/resp` with tests (`ReadValue`, `WriteValue`; RESP2: `+`, `-`, `:`, `$`, `*`).
+- **Proves it:** `go test ./internal/resp/...` — readme examples (`*1\r\n$4\r\nping\r\n`, `+OK\r\n`, `$-1\r\n`), empty bulk `$0\r\n\r\n`, round-trip for all kinds, nested array.
+- **Limits:** RESP2 only (no RESP3 types). Simple/error lines assume well-formed CRLF-terminated payloads (as in spec).
 
 ### Step 2 — Server, PING, ECHO
 
